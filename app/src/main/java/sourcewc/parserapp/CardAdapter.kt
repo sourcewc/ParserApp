@@ -3,12 +3,14 @@ package sourcewc.parserapp
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.coroutines.*
 import java.io.InputStream
 import java.net.URL
 
@@ -23,11 +25,16 @@ class CardAdapter (val context: Context, val recipeList: ArrayList<Recipe>) : Ba
 
         val card = recipeList[position]
 
-        val url = URL(card.image)
-        val input:InputStream = url.openConnection().getInputStream()
-        val bitmap: Bitmap? = BitmapFactory.decodeStream(input)
-
-        imageFood.setImageBitmap(bitmap)
+        var bitmap:Bitmap? = null
+        GlobalScope.launch(Dispatchers.Main) {
+            async(Dispatchers.Default) {
+                val url = URL(card.image)
+                val input: InputStream = url.openConnection().getInputStream()
+                bitmap = BitmapFactory.decodeStream(input)
+            }.await().let {
+                imageFood.setImageBitmap(bitmap)
+            }
+        }
         title.text = card.title
         description.text = card.description
         Content.text = card.content
