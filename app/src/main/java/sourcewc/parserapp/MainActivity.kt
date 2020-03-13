@@ -1,6 +1,5 @@
 package sourcewc.parserapp;
 
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -49,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 //        val stringBuffer = StringBuffer()
 //        val recipe = "recipe_"
 //        val recipeImage = "recipe_image_"
-//        val recipeTitle = "recipe_title"
+        val recipeTitle = "recipe_title"
 //        val recipeDescription = "recipe_discription_"
 //        val meterial = "meterial ingredients"
         val cardList = arrayListOf<Recipe>()
@@ -57,10 +56,12 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             async(Dispatchers.Default) {try {
                 val doc = Jsoup.connect("https://cookpad.com/search/" + inputText).get()
-                val contents : Elements = doc.select(".recipe-preview a img")
-                for(content in contents) {
-                    cardList.add(Recipe(content.attr("src"),"심효근","sdfsf","아령하세요잇!"))
+                val imageContents : Elements = doc.select(".recipe-preview a img")
+                val contents : Elements = doc.select(".recipe_description")
+                for(content in imageContents) {
+                    cardList.add(Recipe(content.attr("src"),"심효근",contents.text(),"아령하세요잇!"))
                 }
+                println(contents)
             } catch (e: IOException) {
                 e.printStackTrace()
             } }.await().let {

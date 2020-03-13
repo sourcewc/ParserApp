@@ -33,12 +33,11 @@ class CardAdapter (val context: Context, val recipeList: ArrayList<Recipe>) : Ba
                 bitmap = BitmapFactory.decodeStream(input)
             }.await().let {
                 imageFood.setImageBitmap(bitmap)
+                title.text = card.title
+                description.text = card.description
+                Content.text = card.content
             }
         }
-        title.text = card.title
-        description.text = card.description
-        Content.text = card.content
-
         return view
     }
 
