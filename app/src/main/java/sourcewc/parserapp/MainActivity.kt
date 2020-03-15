@@ -1,5 +1,6 @@
 package sourcewc.parserapp
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.*
@@ -11,6 +12,7 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
+    private val urlList = mutableListOf<String>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,12 +34,11 @@ class MainActivity : AppCompatActivity() {
          }
 
 
-//        val cardList = arrayListOf<Recipe>()
-//        itemListView.adapter = CardAdapter(this,cardList)
         itemListView.setOnItemClickListener { parent, view, position, id ->
-
-//            val item : String = parent.getItemAtPosition(position) as String
-            Toast.makeText(this, "get i", Toast.LENGTH_SHORT).show()
+            val nextIntent = Intent(this, CookPadWeb::class.java)
+            val recipeUrl : String = "https://cookpad.com/" + urlList.get(position)
+            nextIntent.putExtra("URL_KEY",recipeUrl)
+            startActivity(nextIntent)
         }
     }
 
@@ -56,17 +57,21 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             async(Dispatchers.Default) {try {
                 val doc = Jsoup.connect("https://cookpad.com/search/" + inputText).get()
+
+                val urlContents : Elements = doc.select(".recipe-preview a")
                 val imageContents : Elements = doc.select(".recipe-preview a img")
                 val titleContents : Elements = doc.select(".recipe-preview a img")
                 val contents : Elements = doc.select(".recipe_description")
                 val materials : Elements = doc.select(".material")
 
+                for(content in urlContents) {
+                    urlList.add(content.attr("href"))
+                }
                 for(content in imageContents) {
                     imageUrlList.add(content.attr("src"))
                 }
                 for(content in contents) {
                     contentsList.add(content.text())
-                    println(content)
                 }
                 for(content in titleContents) {
                     titleList.add(content.attr("alt"))
@@ -85,8 +90,9 @@ class MainActivity : AppCompatActivity() {
                list.adapter = cardAdapter
             }
         }
+        imageUrlList.clear()
+        contentsList.clear()
+        titleList.clear()
+        materialList.clear()
     }
-
-
-
 }
